@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>⚛️ Quantum Wave-Explorer - Simulasi Fungsi Gelombang & Tunneling</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        }
+        
+        body {
+            background: #f0f4fa;
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .simulation-container {
+            max-width: 1400px;
+            width: 100%;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(145deg, #0B2447, #19376D);
+            padding: 20px 25px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header h1 span {
+            background: linear-gradient(135deg, #A5D7E8, #FFC436);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header .subtitle {
+            font-size: 0.9rem;
+            color: #C4D7E0;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        /* Layout utama */
+        .main-layout {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            background: #F8FAFC;
+            flex-wrap: wrap;
+        }
+        
+        /* Bagian Kiri: Grafik */
+        .graph-section {
+            flex: 2;
+            min-width: 500px;
+        }
+        
+        .graph-card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #E9EEF3;
+        }
+        
+        .graph-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .graph-title h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0B2447;
+        }
+        
+        .graph-title .badge {
+            background: #E9EEF3;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+        
+        canvas {
+            width: 100%;
+            height: auto;
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+        }
+        
+        .graph-caption {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #4B5E77;
+        }
+        
+        /* Time Controller */
+        .time-controller {
+            background: white;
+            border-radius: 40px;
+            padding: 12px 20px;
+            margin-top: 10px;
+            border: 1px solid #E2E8F0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .ctrl-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            color: #19376D;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            border: 1px solid #E2E8F0;
+            transition: all 0.2s;
+        }
+        
+        .ctrl-btn:hover {
+            background: #19376D;
+            color: white;
+        }
+        
+        .ctrl-btn.active {
+            background: #FFC436;
+            color: #0B2447;
+            border-color: #FFC436;
+        }
+        
+        .time-slider-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .time-slider-container span {
+            font-size: 0.8rem;
+            color: #19376D;
+            font-weight: 500;
+        }
+        
+        input[type=range] {
+            flex: 1;
+            height: 5px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #19376D, #576CBC);
+            -webkit-appearance: none;
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border: 2px solid #19376D;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        /* Bagian Kanan */
+        .control-section {
+            flex: 1;
+            min-width: 280px;
+        }
+        
+        .control-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #E9EEF3;
+        }
+        
+        .control-panel h2 {
+            font-size: 1.3rem;
+            color: #0B2447;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #FFC436;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+        
+        .slider-block {
+            margin-bottom: 20px;
+        }
+        
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #2C3E5A;
+        }
+        
+        .slider-header .value {
+            background: #0B2447;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .particle-selector {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .particle-option {
+            flex: 1;
+            background: #F1F5F9;
+            border: 2px solid #E2E8F0;
+            border-radius: 14px;
+            padding: 10px 3px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        
+        .particle-option.active {
+            background: linear-gradient(145deg, #0B2447, #19376D);
+            border-color: #FFC436;
+            color: white;
+        }
+        
+        .particle-option small {
+            display: block;
+            font-size: 0.6rem;
+            margin-top: 3px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 15px 0;
+        }
+        
+        .info-card {
+            background: #F8FCFD;
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid #DBE5F0;
+            text-align: center;
+        }
+        
+        .info-label {
+            font-size: 0.7rem;
+            color: #64748B;
+        }
+        
+        .info-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0B2447;
+        }
+        
+        .status-indicator {
+            background: #F1F5F9;
+            border-radius: 14px;
+            padding: 12px;
+            border-left: 5px solid #FFC436;
+            margin: 15px 0;
+        }
+        
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+        
+        /* Panduan & Verifikasi */
+        .guide-box {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #E9EEF3;
+        }
+        
+        .guide-title {
+            font-weight: 700;
+            color: #0B2447;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+        
+        .step-guide {
+            background: #FFF9E6;
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 0.75rem;
+            margin: 10px 0;
+        }
+        
+        .step-guide p {
+            margin: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-icon {
+            background: #0B2447;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+        }
+        
+        .verification-box {
+            background: #F0F9FF;
+            border-radius: 16px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #B8D8F0;
+        }
+        
+        .verification-title {
+            font-weight: 700;
+            color: #0369A1;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        
+        .verification-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .verif-item {
+            background: white;
+            border-radius: 20px;
+            padding: 8px 3px;
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #CBD5E1;
+        }
+        
+        .verif-item.selected {
+            background: #0284C7;
+            color: white;
+        }
+        
+        .check-btn {
+            background: #0284C7;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 10px;
+            font-weight: 700;
+            width: 100%;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        
+        .reset-btn {
+            background: #E2E8F0;
+            color: #334155;
+            border: none;
+            border-radius: 40px;
+            padding: 10px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        .verification-result {
+            background: white;
+            border-radius: 14px;
+            padding: 12px;
+            margin-top: 12px;
+            border-left: 5px solid #9CA3AF;
+        }
+        
+        .result-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .status-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .status-icon.success {
+            background: #DCFCE7;
+            color: #166534;
+        }
+        
+        .status-icon.failed {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        .conclusion-box {
+            background: #F3E8FF;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 0.75rem;
+            border-left: 3px solid #9333EA;
+        }
+        
+        .warning-message {
+            background: #FEE2E2;
+            border-radius: 12px;
+            padding: 10px;
+            color: #B91C1C;
+            font-size: 0.75rem;
+            margin-top: 12px;
+            display: none;
+        }
+        
+        .warning-message.show {
+            display: block;
+        }
+        
+        .footer {
+            background: #0F2C4F;
+            color: #A0C0E0;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.7rem;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .graph-section {
+                min-width: 100%;
+            }
+            .time-controller {
+                justify-content: center;
+            }
+            .verification-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="simulation-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>⚛️ <span>Quantum Wave-Explorer</span></h1>
+            <div class="subtitle">
+                <span>🔬 Simulasi Fungsi Gelombang & Tunneling</span>
+                <span>📌 Belajar Fisika Kuantum Interaktif</span>
+            </div>
+        </div>
+        
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Bagian Kiri: Grafik -->
+            <div class="graph-section">
+                <!-- Grafik Atas -->
+                <div class="graph-card">
+                    <div class="graph-title">
+                        <h3>📈 FUNGSI GELOMBANG ψ(x,t)</h3>
+                        <div class="badge" id="waveStatus">Amplitudo: 1.42</div>
+                    </div>
+                    <canvas id="waveCanvas" width="900" height="220"></canvas>
+                    <div class="graph-caption">
+                        <span style="color:#2563EB;">⬤ Biru = Real</span> | 
+                        <span style="color:#9333EA;">⬤ Ungu = Imajiner</span> | 
+                        <span style="color:#DC2626;">█ Merah = Penghalang</span>
+                    </div>
+                </div>
+                
+                <!-- Grafik Bawah -->
+                <div class="graph-card">
+                    <div class="graph-title">
+                        <h3>📊 PROBABILITAS |ψ(x,t)|²</h3>
+                        <div class="badge" id="probStatus">Maks: 1.98</div>
+                    </div>
+                    <canvas id="probCanvas" width="900" height="220"></canvas>
+                    <div class="graph-caption">
+                        <span style="color:#059669;">🟢 Area hijau = Kemungkinan menemukan partikel</span>
+                    </div>
+                </div>
+                
+                <!-- Time Controller -->
+                <div class="time-controller">
+                    <div class="btn-group">
+                        <button class="ctrl-btn" id="playBtn">▶</button>
+                        <button class="ctrl-btn active" id="pauseBtn">⏸️</button>
+                        <button class="ctrl-btn" id="resetBtn">↺</button>
+                        <button class="ctrl-btn" id="slowerBtn">−</button>
+                        <button class="ctrl-btn" id="fasterBtn">+</button>
+                    </div>
+                    <div class="time-slider-container">
+                        <span>⏱️ Fase: <span id="timeValue">0.00</span></span>
+                        <input type="range" id="timeSlider" min="0" max="6.28" step="0.01" value="0">
+                    </div>
+                </div>
+                
+                <!-- Panduan & Verifikasi -->
+                <div class="guide-box">
+                    <div class="guide-title">📋 PANDUAN MENJAWAB 5 MISKONSEPSI</div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 12px;">
+                        <div style="background:#F1F5F9; border-radius:20px; padding:6px 2px; text-align:center; font-size:0.7rem; font-weight:600;">1️⃣ λ membesar</div>
+                        <div style="background:#F1F5F9; border-radius:20px; padding:6px 2px; text-align:center; font-size:0.7rem; font-weight:600;">2️⃣ Tunneling</div>
+                        <div style="background:#F1F5F9; border-radius:20px; padding:6px 2px; text-align:center; font-size:0.7rem; font-weight:600;">3️⃣ Efek Massa</div>
+                        <div style="background:#F1F5F9; border-radius:20px; padding:6px 2px; text-align:center; font-size:0.7rem; font-weight:600;">4️⃣ ψ vs |ψ|²</div>
+                        <div style="background:#F1F5F9; border-radius:20px; padding:6px 2px; text-align:center; font-size:0.7rem; font-weight:600;">5️⃣ Ketebalan</div>
+                    </div>
+                    
+                    <div class="step-guide">
+                        <p><span class="btn-icon">1</span> <strong>Panjang gelombang:</strong> E=5, V₀=3 → gelombang di merah meregang</p>
+                        <p><span class="btn-icon">2</span> <strong>Tunneling:</strong> E=3, V₀=5 → gelombang menembus barrier</p>
+                        <p><span class="btn-icon">3</span> <strong>Massa:</strong> Klik Proton vs Elektron → beda kerapatan gelombang</p>
+                        <p><span class="btn-icon">4</span> <strong>ψ vs |ψ|²:</strong> Bandingkan grafik biru & hijau → puncak sama</p>
+                        <p><span class="btn-icon">5</span> <strong>Ketebalan:</strong> Geser Lebar L → lihat angka Transmisi (T)</p>
+                    </div>
+                    
+                    <div style="background:#E6F0FF; padding:8px; border-radius:12px; font-size:0.7rem;">
+                        🎯 <strong>Tombol:</strong> ▶ Play | ⏸️ Pause | ↺ Reset | −/+ Kecepatan
+                    </div>
+                </div>
+                
+                <!-- Verification Box -->
+                <div class="verification-box">
+                    <div class="verification-title">✅ CEK KEBERHASILAN SIMULASI</div>
+                    <div class="verification-grid">
+                        <div class="verif-item" id="verif1">Soal 1</div>
+                        <div class="verif-item" id="verif2">Soal 2</div>
+                        <div class="verif-item" id="verif3">Soal 3</div>
+                        <div class="verif-item" id="verif4">Soal 4</div>
+                        <div class="verif-item" id="verif5">Soal 5</div>
+                    </div>
+                    <button class="check-btn" id="checkBtn">🔍 CEK SIMULASI</button>
+                    <button class="reset-btn" id="resetCheckBtn">↺ Reset Cek</button>
+                    
+                    <div class="verification-result" id="resultBox">
+                        <div class="result-status" id="resultStatus">
+                            <div class="status-icon" id="resultIcon">⏳</div>
+                            <div class="status-message" id="resultMessage" style="font-size:0.8rem;">Pilih soal lalu tekan "CEK SIMULASI"</div>
+                        </div>
+                        <div class="conclusion-box" id="conclusionBox">
+                            <strong>Kesimpulan:</strong> <span id="conclusionText">Belum ada simulasi yang dicek</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="warning-message" id="warningMsg">
+                    ⚠️ <span id="warningText"></span>
+                </div>
+            </div>
+            
+            <!-- Bagian Kanan: Panel Kontrol -->
+            <div class="control-section">
+                <div class="control-panel">
+                    <h2>🎮 PANEL KONTROL</h2>
+                    
+                    <div class="slider-block">
+                        <div class="slider-header">
+                            <span>⚡ Energi Partikel (E)</span>
+                            <span class="value" id="eDisplay">5.0 eV</span>
+                        </div>
+                        <input type="range" id="eSlider" min="0.1" max="10" step="0.1" value="5.0">
+                    </div>
+                    
+                    <div class="slider-block">
+                        <div class="slider-header">
+                            <span>⛰️ Tinggi Potensial (V₀)</span>
+                            <span class="value" id="v0Display">3.0 eV</span>
+                        </div>
+                        <input type="range" id="v0Slider" min="0" max="10" step="0.1" value="3.0">
+                    </div>
+                    
+                    <div class="slider-block">
+                        <div class="slider-header">
+                            <span>📏 Lebar Penghalang (L)</span>
+                            <span class="value" id="lDisplay">2.0 nm</span>
+                        </div>
+                        <input type="range" id="lSlider" min="0.5" max="5" step="0.1" value="2.0">
+                    </div>
+                    
+                    <div style="font-weight:500; margin-bottom:8px;">🔬 Pilih Partikel:</div>
+                    <div class="particle-selector">
+                        <div class="particle-option active" id="optElektron">⚡ Elektron<small>m = 9,1×10⁻³¹ kg</small></div>
+                        <div class="particle-option" id="optMuon">⚛️ Muon<small>m = 1,88×10⁻²⁸ kg</small></div>
+                        <div class="particle-option" id="optProton">💫 Proton<small>m = 1,67×10⁻²⁷ kg</small></div>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label">Transmisi (T)</div>
+                            <div class="info-number" id="tValue">0.892</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Refleksi (R)</div>
+                            <div class="info-number" id="rValue">0.108</div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-indicator" id="statusPanel">
+                        <div class="status-row"><span>📐 Panjang Gelombang λ:</span><strong id="lambdaValue">0.389 nm</strong></div>
+                        <div class="status-row"><span>🔮 Status Energi:</span><strong id="energyStatus">E > V₀</strong></div>
+                        <div class="status-row"><span>⚖️ Massa:</span><strong id="massDisplay">9.109×10⁻³¹ kg</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            ⚛️ Quantum Wave-Explorer | Visualisasi Persamaan Schrödinger | Untuk Pembelajaran Fisika Kuantum
+        </div>
+    </div>
+
+    <script>
+        // ==================== KONSTANTA FISIKA ====================
+        const hbar = 1.054e-34;
+        const eV_to_J = 1.602e-19;
+        const nm_to_m = 1e-9;
+        
+        const MASSA = {
+            ELEKTRON: 9.109e-31,
+            MUON: 207 * 9.109e-31,
+            PROTON: 1.673e-27
+        };
+        
+        // ==================== STATE GLOBAL ====================
+        const state = {
+            E: 5.0,
+            V0: 3.0,
+            L: 2.0,
+            m: MASSA.ELEKTRON,
+            partikel: 'Elektron',
+            time: 0,
+            isPlaying: false,
+            speed: 0.02,
+            selectedVerif: null
+        };
+        
+        // ==================== SETUP CANVAS ====================
+        const waveCanvas = document.getElementById('waveCanvas');
+        const probCanvas = document.getElementById('probCanvas');
+        const ctxWave = waveCanvas.getContext('2d');
+        const ctxProb = probCanvas.getContext('2d');
+        
+        const xMin = 0, xMax = 12;
+        const barrierStart = 5.0;
+        const Nx = 500;
+        const x = Array.from({length: Nx}, (_, i) => xMin + (i/(Nx-1)) * (xMax - xMin));
+        
+        function hitungKoefisien() {
+            const E_J = state.E * eV_to_J;
+            const V0_J = state.V0 * eV_to_J;
+            const L_m = state.L * nm_to_m;
+            const k1 = Math.sqrt(2 * state.m * E_J) / hbar;
+            
+            if (state.E > state.V0) {
+                const k2 = Math.sqrt(2 * state.m * (E_J - V0_J)) / hbar;
+                const T = 1 / (1 + (V0_J * V0_J * Math.pow(Math.sin(k2 * L_m), 2)) / (4 * E_J * (E_J - V0_J)));
+                return { T, R: 1 - T, k1, k2 };
+            } else {
+                const kappa = Math.sqrt(2 * state.m * (V0_J - E_J)) / hbar;
+                const sinhVal = Math.sinh(Math.min(kappa * L_m, 10));
+                const T = 1 / (1 + (V0_J * V0_J * sinhVal * sinhVal) / (4 * E_J * (V0_J - E_J)));
+                return { T, R: 1 - T, k1, kappa };
+            }
+        }
+        
+        function hitungSemua() {
+            const { T, R, k1, k2, kappa } = hitungKoefisien();
+            const barrierEnd = barrierStart + state.L;
+            const psiReal = new Array(Nx);
+            const psiImag = new Array(Nx);
+            const psiMag = new Array(Nx);
+            const faktorWaktu = (state.E * eV_to_J / hbar) * state.time;
+            
+            for (let i = 0; i < Nx; i++) {
+                const xi = x[i];
+                let re = 0, im = 0;
+                
+                if (xi < barrierStart) {
+                    const fase1 = k1 * xi - faktorWaktu;
+                    const fase2 = -k1 * xi - faktorWaktu;
+                    re = Math.cos(fase1) + Math.sqrt(R) * Math.cos(fase2);
+                    im = Math.sin(fase1) + Math.sqrt(R) * Math.sin(fase2);
+                }
+                else if (xi < barrierEnd) {
+                    if (state.E > state.V0) {
+                        const fase = k2 * (xi - barrierStart) - faktorWaktu;
+                        re = Math.sqrt(T) * Math.cos(fase);
+                        im = Math.sqrt(T) * Math.sin(fase);
+                    } else {
+                        const decay = Math.exp(-kappa * (xi - barrierStart));
+                        re = Math.sqrt(T) * decay * Math.cos(-faktorWaktu);
+                        im = Math.sqrt(T) * decay * Math.sin(-faktorWaktu);
+                    }
+                }
+                else {
+                    const fase = k1 * (xi - barrierEnd) - faktorWaktu;
+                    re = Math.sqrt(T) * Math.cos(fase);
+                    im = Math.sqrt(T) * Math.sin(fase);
+                }
+                psiReal[i] = re;
+                psiImag[i] = im;
+                psiMag[i] = Math.sqrt(re*re + im*im);
+            }
+            return { psiReal, psiImag, psiMag, T, R, k1 };
+        }
+        
+        function draw() {
+            try {
+                const { psiReal, psiImag, psiMag, T, R, k1 } = hitungSemua();
+                const prob = psiMag.map(p => p * p);
+                const maxPsi = Math.max(...psiMag) * 1.2;
+                const maxProb = Math.max(...prob) * 1.2;
+                
+                document.getElementById('eDisplay').innerHTML = state.E.toFixed(1) + ' eV';
+                document.getElementById('v0Display').innerHTML = state.V0.toFixed(1) + ' eV';
+                document.getElementById('lDisplay').innerHTML = state.L.toFixed(1) + ' nm';
+                document.getElementById('tValue').innerText = T.toFixed(3);
+                document.getElementById('rValue').innerText = R.toFixed(3);
+                document.getElementById('timeValue').innerText = state.time.toFixed(2);
+                document.getElementById('lambdaValue').innerText = (2 * Math.PI / k1 * 1e9).toFixed(3) + ' nm';
+                
+                let statusEnergi = state.E > state.V0 ? 'E > V₀ (di atas barrier)' : (state.E < state.V0 ? '⚠️ E < V₀ (TUNNELING)' : 'E = V₀ (resonansi)');
+                document.getElementById('energyStatus').innerText = statusEnergi;
+                
+                let massaText = state.m === MASSA.ELEKTRON ? '9.109×10⁻³¹ kg' : (state.m === MASSA.MUON ? '1.883×10⁻²⁸ kg' : '1.673×10⁻²⁷ kg');
+                document.getElementById('massDisplay').innerText = massaText;
+                document.getElementById('waveStatus').innerHTML = 'Amplitudo: ' + maxPsi.toFixed(2);
+                document.getElementById('probStatus').innerHTML = 'Maks: ' + maxProb.toFixed(2);
+                
+                // Draw Wave
+                ctxWave.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+                const barrierX1 = (barrierStart / xMax) * waveCanvas.width;
+                const barrierX2 = ((barrierStart + state.L) / xMax) * waveCanvas.width;
+                ctxWave.fillStyle = 'rgba(239, 68, 68, 0.12)';
+                ctxWave.fillRect(barrierX1, 0, barrierX2 - barrierX1, waveCanvas.height);
+                ctxWave.strokeStyle = '#EF4444';
+                ctxWave.lineWidth = 2;
+                ctxWave.strokeRect(barrierX1, 0, barrierX2 - barrierX1, waveCanvas.height);
+                
+                ctxWave.beginPath();
+                ctxWave.strokeStyle = '#2563EB';
+                ctxWave.lineWidth = 2;
+                for (let i = 0; i < Nx; i++) {
+                    const canvasX = (x[i] / xMax) * waveCanvas.width;
+                    const canvasY = waveCanvas.height/2 - (psiReal[i] / maxPsi) * (waveCanvas.height/2 - 20);
+                    if (i === 0) ctxWave.moveTo(canvasX, canvasY);
+                    else ctxWave.lineTo(canvasX, canvasY);
+                }
+                ctxWave.stroke();
+                
+                ctxWave.beginPath();
+                ctxWave.strokeStyle = '#9333EA';
+                ctxWave.setLineDash([5, 3]);
+                for (let i = 0; i < Nx; i++) {
+                    const canvasX = (x[i] / xMax) * waveCanvas.width;
+                    const canvasY = waveCanvas.height/2 - (psiImag[i] / maxPsi) * (waveCanvas.height/2 - 20);
+                    if (i === 0) ctxWave.moveTo(canvasX, canvasY);
+                    else ctxWave.lineTo(canvasX, canvasY);
+                }
+                ctxWave.stroke();
+                ctxWave.setLineDash([]);
+                
+                // Draw Probability
+                ctxProb.clearRect(0, 0, probCanvas.width, probCanvas.height);
+                ctxProb.fillStyle = 'rgba(239, 68, 68, 0.12)';
+                ctxProb.fillRect(barrierX1, 0, barrierX2 - barrierX1, probCanvas.height);
+                ctxProb.fillStyle = 'rgba(5, 150, 105, 0.25)';
+                ctxProb.beginPath();
+                for (let i = 0; i < Nx; i++) {
+                    const canvasX = (x[i] / xMax) * probCanvas.width;
+                    const canvasY = probCanvas.height - (prob[i] / maxProb) * (probCanvas.height - 20);
+                    if (i === 0) ctxProb.moveTo(canvasX, canvasY);
+                    else ctxProb.lineTo(canvasX, canvasY);
+                }
+                ctxProb.lineTo((x[Nx-1] / xMax) * probCanvas.width, probCanvas.height);
+                ctxProb.lineTo(0, probCanvas.height);
+                ctxProb.closePath();
+                ctxProb.fill();
+                
+                ctxProb.beginPath();
+                ctxProb.strokeStyle = '#059669';
+                ctxProb.lineWidth = 2.5;
+                for (let i = 0; i < Nx; i++) {
+                    const canvasX = (x[i] / xMax) * probCanvas.width;
+                    const canvasY = probCanvas.height - (prob[i] / maxProb) * (probCanvas.height - 20);
+                    if (i === 0) ctxProb.moveTo(canvasX, canvasY);
+                    else ctxProb.lineTo(canvasX, canvasY);
+                }
+                ctxProb.stroke();
+                
+                document.getElementById('timeSlider').value = state.time;
+                document.getElementById('warningMsg').classList.remove('show');
+            } catch(e) {
+                document.getElementById('warningText').innerText = 'Terjadi kesalahan, coba atur ulang nilai.';
+                document.getElementById('warningMsg').classList.add('show');
+            }
+        }
+        
+        function cekSimulasi(soal) {
+            const T = parseFloat(document.getElementById('tValue').innerText);
+            let berhasil = false, pesan = '', kesimpulan = '';
+            
+            switch(soal) {
+                case 1:
+                    if (state.E > state.V0 && state.E - state.V0 < 3) {
+                        berhasil = true;
+                        pesan = '✅ BERHASIL! Panjang gelombang membesar di daerah potensial.';
+                        kesimpulan = 'Sesuai teori: λ = h/√(2m(E-V₀)), ketika E-V₀ mengecil, λ membesar.';
+                    } else {
+                        pesan = '❌ GAGAL! Atur E > V₀ dengan selis
